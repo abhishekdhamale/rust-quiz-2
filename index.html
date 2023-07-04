@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rust Quiz</title>
+  <link rel="stylesheet" href="static/bootstrap.min.css">
+  <style>
+    body { margin: 20px; }
+    #question-container { margin: 20px 0; }
+    #options-container { margin: 10px 0; }
+    #result { text-align: center; margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body class="container-fluid d-flex flex-column h-100 align-items-center px-0 w-100 ">
+
+    <div class="row grow w-100">
+
+        <div class="container">
+
+            <div class="card text-center shadow-sm">
+                <div class="d-flex justify-content-between">
+                    <ul class="list-group justify-content-center">
+                        <li class="list-group-item border-0">
+                            <img class="LogoImage" height="80" src="static/rust-quiz.jpeg">
+                        </li>
+                    </ul>
+                    <ul class="list-group justify-content-center">
+                        <li class="list-group-item border-0">
+                            <h1 class="text-muted"><strong>Rust Quiz</strong></h1>
+                        </li>
+                    </ul>
+                    <ul class="list-group justify-content-center px-1">
+                        <div class="card border-0" id="QuizTimer" hidden>
+                            <div class="card-body"><h3 id="ElapsedTime"></h3></div>
+                        </div>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mt-2" id="StartBox">
+                <div class="card-body d-flex justify-content-center">
+                    <button type="button" class="btn btn-lg btn-primary" onclick="StartQuiz()"><h1>START</h1></button>
+                </div>
+                <div class="card-footer d-flex justify-content-center">Note: Do not refresh or hit back button</div>
+            </div>
+    
+            <div class="card mt-2" id="QuestionBox" hidden>
+                <div class="card-header d-flex justify-content-between">
+                    <div class="col-9">
+                        <div id="question-container">
+                            <h3><strong>Q. </strong><strong id="question"></strong></h3>
+                        </div>
+                    </div>
+                    <div class="col-3 d-flex justify-content-end">
+                        <div>
+                            <h3><strong id="questionNum"></strong></h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                    <div id="options-container">
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="option" id="option1">
+                          <label class="form-check-label" for="option1" id="option1-label"></label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="option" id="option2">
+                          <label class="form-check-label" for="option2" id="option2-label"></label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="option" id="option3">
+                          <label class="form-check-label" for="option3" id="option3-label"></label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="radio" name="option" id="option4">
+                          <label class="form-check-label" for="option4" id="option4-label"></label>
+                        </div>
+                      </div>
+                </div>
+                <div class="card-footer d-flex justify-content-end">
+                    <button class="btn btn-primary" onclick="nextQuestion()">Next</button>
+                </div>
+            </div>
+    
+            <div class="card mt-4" id="ResultBox" hidden>
+                <div class="card-header">
+                    <h1 id="result"></h1>
+                </div>
+            </div>
+        
+        </div>
+    </div>
+
+
+    <script>
+    // Define the questions and their options
+        var QUESTIONS = [
+            { question: "What is Rust?", options: ["A compiled programming language", "An interpreted programming language", "A scripting language", "A markup language"], answer: 0 },
+            { question: "Which company developed Rust?", options: ["Google", "Microsoft", "Mozilla", "Apple"], answer: 2 },
+            { question: "Rust is known for its emphasis on:", options: ["Memory safety", "High performance", "Concurrency", "All of the above"], answer: 3 },
+            { question: "Which of the following is a benefit of using Rust?", options: ["Automatic memory management", "Garbage collection", " Manual memory management", "Optional memory management"], answer: 0 },
+            { question: "Which of the following is NOT a primitive data type in Rust?", options: ["i32", "f64", "boolean", "string"], answer: 0 },
+            { question: "Which among the following is not a valid keyword in Rust? ", options: ["mut", "impl", "let", "var"], answer: 3 },
+            { question: "Which keyword is used to write a function in rust? ", options: ["function", "def", "fn", "func"], answer: 2 },
+            { question: "What are the result types in Rust? ", options: ["structure", "enum", "class", "union"], answer: 1 },
+            { question: "Which symbol is used to declare the functions with return values? ", options: ["::", "< >", " [ ]", "->"], answer: 3 },
+            { question: "Which among the following loop is not supported by Rust? ", options: ["loop", "do while", "while", "for"], answer: 2 },
+            { question: "Which among the following is false with respect to ownership rules? ", options: ["Owner never goes out of scope", "There can only be one owner at a time.", "When the owner goes out of scope, the value will be dropped.", "Each value in Rust has a variable which is the owner."], answer: 0 },
+            { question: "What does the String data type hold in Rust? ", options: ["a pointer to the memory where String resides and its capacity", "a pointer to the memory where String resides, a length, and a capacity", "a string value and its length", "a string value, a length, and a capacity"], answer: 1 },
+            { question: "What is the proper notation of Rust's range syntax? ", options: ["let slice = &s[0-2];", "let slice = &s[0..2];", "let slice = s[0-2];", "let slice = &s[0:2];"], answer: 1 },
+            { question: "Which among the following is true with respect to Multiple impl blocks?", options: ["Each struct is allowed to have multiple impl blocks", "each method in its own impl block", "first parameter is always self", "All of the above"], answer: 3 },
+            { question: "Rust uses a package manager called:", options: ["NPM", "Pip", "Cargo", "Maven"], answer: 2 },
+            { question: "Which of the following is not a valid Rust variable binding?", options: ["let x = 5;", "let z: i32 = 'hello';", "let mut y = 10;", "let s = String::from('world');"], answer: 1 },
+            { question: "Ownership is primarily managed through:", options: ["Reference counting", "Garbage collection", "memory management", "Ownership transfer"], answer: 3 },
+            { question: "What is the result of this code: let x = Some(5); let y = x.unwrap_or(10);", options: [" x contains Some(5)", "x contains None", "x contains 10", "y contains 5"], answer: 3 },
+            { question: "Which keyword is used to define a new trait?", options: ["interface", "trait", "impl", "self"], answer: 1 },
+            { question: "What does the 'async' keyword indicate in Rust?", options: ["marks a function as a generator", "to implement sync trait", "marks a function as asynchronous", "marks a function as unsafe"], answer: 2 },
+            { question: "What does the 'Drop' trait allow you to do?", options: ["Manually deallocate memory", "Perform cleanup operations before a value goes out of scope", "Prevent other threads from accessing a value", "Convert a value to a different type"], answer: 1 },
+            { question: "What does the 'Copy' trait indicate in Rust?", options: ["It allows mutation of values", "It allows comparison of values", "It allows cloning of values", "It allows serialization of values"], answer: 2 },
+            { question: "Which of the following is not a valid numeric type in Rust?", options: ["u8", "c64", "f32", "i16"], answer: 1 },
+            { question: "Which of the following is not a valid slice in Rust?", options: ["&[1, 2, 3]", "&[1; 3]", "&vec![1, 2, 3]", "&[1..=3]"], answer: 3 },
+            { question: "What does the 'unwrap' method do on an Option type?", options: ["It returns the inner value if it exists, otherwise it returns None", "It returns a reference to the inner value", "It returns the inner value if it exists, otherwise it panics", "It converts the Option type to a Result type"], answer: 2 },
+            { question: "What does the 'self' keyword represent in a method definition?", options: ["The current module", "The current function", "The current struct or enum instance", "The current thread"], answer: 2 },
+            { question: "Which of the following is not a valid Rust comment?", options: ["// This is a comment", "/* This is a comment */", " //! This is a documentation comment", "/// This is a documentation comment"], answer: 3 },
+            { question: "What does the 'mod' keyword do?", options: ["It defines a new module", "It imports a module from another file", "It marks a module as public", "It defines a macro"], answer: 0 },
+            { question: "Which of the following is true about Rust's smart pointer types?", options: ["Rust does not have smart pointer types", "Rust's smart pointer types allow mutable references to data", "Rust's smart pointer types allow shared ownership of data", "Rust's smart pointer types are automatically deallocated when they go out of scope"], answer: 2 },
+            { question: "How do you create a new instance of a string?", options: ["Using the String struct's new method", "Using the String::from function", "Using the str::new method", "Using the str::from function"], answer: 1 },
+            { question: "What does the 'mut' keyword indicate in Rust?", options: ["It marks a function as mutable", "It marks a variable as mutable", "It marks a type as mutable", "It marks a block of code as mutable"], answer: 1 },
+            { question: "Which of the following is true about Rust's string types?", options: ["Rust only supports ASCII strings", "Rust only supports null-terminated strings", "Rust supports only fixed-length strings", " Rust supports both UTF-8 and ASCII strings"], answer: 3 },
+            { question: "Which of the following is true about Rust's reference types?", options: ["References can be null", "References can be mutable or immutable", "References can have a longer lifetime than the data they reference", "References are automatically deallocated when they go out of scope"], answer: 1 },
+            { question: "In Rust, how do you define a new type alias?", options: ["Using the type keyword", "Using the alias keyword", "Using the typedef keyword", "Using the define keyword"], answer: 1 },
+            { question: "Which of the following is the correct way to use a Result type in Rust for error handling?", options: ["Using the `try` keyword", "Using the `check` keyword", "Using the `if` statement", "Using the `match` expression"], answer: 3 },
+            //{ question: "", options: ["", "", "", ""], answer: 0 },
+            //{ question: "", options: ["", "", "", ""], answer: 0 },
+        ];
+        
+        var currentQuestion = 0; var score = 0; var startQuizTimer = false; var elapsedTime = 0;
+        var questionNum = 0; var askedQuestions = []; var totalQuestions = 25;
+        function getRandomArbitrary(min, max) { return Math.random() * (max - min) + min; }
+        var getNextQuestion = function(){ var NextQuestionNum = parseInt(getRandomArbitrary(0, QUESTIONS.length)); if(!askedQuestions.includes(NextQuestionNum)){ currentQuestion = NextQuestionNum; } else{ getNextQuestion(); } }
+        function displayQuestion() { getNextQuestion(); questionNum++; document.getElementById("questionNum").textContent = "( " + questionNum + " / " + totalQuestions + " )" ;
+            document.getElementById("question").textContent = QUESTIONS[currentQuestion].question;
+            var options = QUESTIONS[currentQuestion].options; for (var i = 0; i < options.length; i++) { var optionLabel = document.getElementById("option" + (i + 1) + "-label"); optionLabel.textContent = options[i]; }
+            askedQuestions.push(currentQuestion);
+        }
+        function nextQuestion() {
+            var selectedOption = document.querySelector('input[name="option"]:checked');
+            if (selectedOption) { 
+                var selectedOptionIndex = parseInt(selectedOption.id.slice(-1)) - 1; if (selectedOptionIndex === QUESTIONS[currentQuestion].answer) { score++; } selectedOption.checked = false; 
+                if (askedQuestions.length < totalQuestions) { displayQuestion(); }  else { displayResult(); }
+            };
+        }
+        var ShowElapsedTime = function(){
+            elapsedTime++; const timer = new Date(elapsedTime * 1000).toISOString().slice(11, 19);
+            document.getElementById("ElapsedTime").textContent = timer;
+            if(startQuizTimer){ setTimeout(ShowElapsedTime, 1000); };
+        }
+        function displayResult() {
+            startQuizTimer = false; document.getElementById("QuestionBox").hidden = true; document.getElementById("ResultBox").hidden = false;
+            document.getElementById("result").textContent = "Your score: " + score + " out of " + totalQuestions;
+        }
+        var StartQuiz = function(){
+            startQuizTimer = true; document.getElementById("StartBox").hidden = true; document.getElementById("QuestionBox").hidden = false; document.getElementById("QuizTimer").hidden = false;
+            ShowElapsedTime(); displayQuestion();
+        }
+
+    </script>
+</body>
+</html>
