@@ -93,6 +93,7 @@
 
     <script>
     // Define the questions and their options
+        
         var QUESTIONS = [
             { question: "What is Rust?", options: ["A compiled programming language", "An interpreted programming language", "A scripting language", "A markup language"], answer: 0 },
             { question: "Which company developed Rust?", options: ["Google", "Microsoft", "Mozilla", "Apple"], answer: 2 },
@@ -162,7 +163,7 @@
             startQuizTimer = true; document.getElementById("StartBox").hidden = true; document.getElementById("QuestionBox").hidden = false; document.getElementById("QuizTimer").hidden = false;
             ShowElapsedTime(); displayQuestion();
         }
-
+        document.addEventListener("contextmenu", function (e){ e.preventDefault();}, false);
     </script>
 </body>
 </html>
