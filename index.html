@@ -1,169 +1,835 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Rust Quiz 2</title>
-  <link rel="stylesheet" href="static/bootstrap.min.css">
-  <style>
-    body { margin: 20px; }
-    #question-container { margin: 20px 0; }
-    #options-container { margin: 10px 0; }
-    #result { text-align: center; margin-top: 20px; font-weight: bold; }
-  </style>
-</head>
-<body class="container-fluid d-flex flex-column h-100 align-items-center px-0 w-100 ">
-
-    <div class="row grow w-100">
-
-        <div class="container">
-
-            <div class="card text-center shadow-sm">
-                <div class="d-flex justify-content-between">
-                    <ul class="list-group justify-content-center">
-                        <li class="list-group-item border-0">
-                            <img class="LogoImage" height="80" src="static/rust-quiz.jpeg">
-                        </li>
-                    </ul>
-                    <ul class="list-group justify-content-center">
-                        <li class="list-group-item border-0">
-                            <h1 class="text-muted"><strong>Rust Quiz</strong></h1>
-                        </li>
-                    </ul>
-                    <ul class="list-group justify-content-center px-1">
-                        <div class="card border-0" id="QuizTimer" hidden>
-                            <div class="card-body"><h3 id="ElapsedTime"></h3></div>
-                        </div>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card mt-2" id="StartBox">
-                <div class="card-body d-flex justify-content-center">
-                    <button type="button" class="btn btn-lg btn-primary" onclick="StartQuiz()"><h1>START</h1></button>
-                </div>
-                <div class="card-footer d-flex justify-content-center">Note: Do not refresh or hit back button</div>
-            </div>
-    
-            <div class="card mt-2" id="QuestionBox" hidden>
-                <div class="card-header d-flex justify-content-between">
-                    <div class="col-9">
-                        <div id="question-container">
-                            <h3><strong>Q. </strong><strong id="question"></strong></h3>
-                        </div>
-                    </div>
-                    <div class="col-3 d-flex justify-content-end">
-                        <div>
-                            <h3><strong id="questionNum"></strong></h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body d-flex justify-content-center">
-                    <div id="options-container">
-                        <div class="form-check">
-                          <input class="form-check-input" type="radio" name="option" id="option1">
-                          <label class="form-check-label" for="option1" id="option1-label"></label>
-                        </div>
-                        <div class="form-check">
-                          <input class="form-check-input" type="radio" name="option" id="option2">
-                          <label class="form-check-label" for="option2" id="option2-label"></label>
-                        </div>
-                        <div class="form-check">
-                          <input class="form-check-input" type="radio" name="option" id="option3">
-                          <label class="form-check-label" for="option3" id="option3-label"></label>
-                        </div>
-                        <div class="form-check">
-                          <input class="form-check-input" type="radio" name="option" id="option4">
-                          <label class="form-check-label" for="option4" id="option4-label"></label>
-                        </div>
-                      </div>
-                </div>
-                <div class="card-footer d-flex justify-content-end">
-                    <button class="btn btn-primary" onclick="nextQuestion()">Next</button>
-                </div>
-            </div>
-    
-            <div class="card mt-4" id="ResultBox" hidden>
-                <div class="card-header">
-                    <h1 id="result"></h1>
-                </div>
-            </div>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust Programming Quiz 2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
+    <style>
+        :root {
+            --primary: #d73a49;
+            --secondary: #2f363d;
+            --accent: #f6f8fa;
+            --text: #24292e;
+            --border: #e1e4e8;
+        }
         
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #fff;
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .setup-section, .quiz-section {
+            background-color: var(--accent);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .quiz-section {
+            display: none;
+        }
+        
+        /* New two-column layout */
+        .quiz-content {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .question-container {
+            flex: 3;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .scoreboard-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .team-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        input {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #c5343f;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .scoreboard {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .team-score {
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .team-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .score {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .score-controls {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .question-counter {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .timer-bar {
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .timer-progress {
+            height: 100%;
+            background-color: var(--primary);
+            width: 100%;
+            transition: width 1s linear;
+        }
+        
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--secondary);
+            padding: 15px;
+            background-color: #f0f4f8;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+        }
+        
+        .code-block {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        pre {
+            margin: 0 !important;
+            border-radius: 8px;
+            font-size: 1.1rem !important;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .result-section {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background-color: var(--accent);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .winner {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .restart-btn {
+            margin-top: 20px;
+        }
+        
+        /* Modal for timer notification */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .modal-btn {
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .quiz-content {
+                flex-direction: column;
+            }
+            
+            .scoreboard {
+                flex-direction: row;
+            }
+            
+            .team-score {
+                flex: 1;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .scoreboard {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rust Programming Quiz 2</h1>
+        
+        <!-- Setup Section -->
+        <div class="setup-section" id="setup">
+            <h2>Team Setup</h2>
+            <form class="team-form" id="teamForm">
+                <div class="form-group">
+                    <label for="team1">Team 1 Name:</label>
+                    <input type="text" id="team1" required placeholder="Enter Team 1 name">
+                </div>
+                <div class="form-group">
+                    <label for="team2">Team 2 Name:</label>
+                    <input type="text" id="team2" required placeholder="Enter Team 2 name">
+                </div>
+                <button type="submit" id="startBtn">Start Quiz</button>
+            </form>
+        </div>
+        
+        <!-- Quiz Section -->
+        <div class="quiz-section" id="quiz">
+            <div class="quiz-content">
+                <!-- Question Container (Left Side) -->
+                <div class="question-container">
+                    <div class="question-header">
+                        <div class="question-counter" id="questionCounter">Question 1/10</div>
+                        <div class="timer" id="timer">2:00</div>
+                    </div>
+                    <div class="timer-bar">
+                        <div class="timer-progress" id="timerProgress"></div>
+                    </div>
+                    <div class="question-text" id="questionText"></div>
+                    <div class="code-block">
+                        <pre><code class="language-rust" id="codeBlock"></code></pre>
+                    </div>
+                    
+                    <div class="navigation">
+                        <button id="nextBtn">Next Question</button>
+                    </div>
+                </div>
+                
+                <!-- Scoreboard Container (Right Side) -->
+                <div class="scoreboard-container">
+                    <h2>Scoreboard</h2>
+                    <div class="scoreboard">
+                        <div class="team-score">
+                            <div class="team-name" id="team1Name">Team 1</div>
+                            <div class="score" id="team1Score">0</div>
+                            <div class="score-controls">
+                                <button class="add-point" data-team="1">+1 Point</button>
+                            </div>
+                        </div>
+                        <div class="team-score">
+                            <div class="team-name" id="team2Name">Team 2</div>
+                            <div class="score" id="team2Score">0</div>
+                            <div class="score-controls">
+                                <button class="add-point" data-team="2">+1 Point</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Result Section -->
+        <div class="result-section" id="result">
+            <h2>Quiz Completed!</h2>
+            <div class="winner" id="winner"></div>
+            <div class="final-scores" id="finalScores"></div>
+            <button class="restart-btn" id="restartBtn">Start New Quiz</button>
+        </div>
+        
+        <!-- Timer Modal -->
+        <div class="modal" id="timerModal">
+            <div class="modal-content">
+                <div class="modal-title">Time's Up!</div>
+                <p>The 2-minute time limit for this question has ended.</p>
+                <button class="modal-btn" id="modalCloseBtn">Continue</button>
+            </div>
         </div>
     </div>
 
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
     <script>
-    // Define the questions and their options
-        
-        var QUESTIONS = [
-            { question: "What is Rust?", options: ["A compiled programming language", "An interpreted programming language", "A scripting language", "A markup language"], answer: 0 },
-            { question: "Which company developed Rust?", options: ["Google", "Microsoft", "Mozilla", "Apple"], answer: 2 },
-            { question: "Rust is known for its emphasis on:", options: ["Memory safety", "High performance", "Concurrency", "All of the above"], answer: 3 },
-            { question: "Which of the following is a benefit of using Rust?", options: ["Automatic memory management", "Garbage collection", " Manual memory management", "Optional memory management"], answer: 0 },
-            { question: "Which of the following is NOT a primitive data type in Rust?", options: ["i32", "f64", "boolean", "string"], answer: 0 },
-            { question: "Which among the following is not a valid keyword in Rust? ", options: ["mut", "impl", "let", "var"], answer: 3 },
-            { question: "Which keyword is used to write a function in rust? ", options: ["function", "def", "fn", "func"], answer: 2 },
-            { question: "What are the result types in Rust? ", options: ["structure", "enum", "class", "union"], answer: 1 },
-            { question: "Which symbol is used to declare the functions with return values? ", options: ["::", "< >", " [ ]", "->"], answer: 3 },
-            { question: "Which among the following loop is not supported by Rust? ", options: ["loop", "do while", "while", "for"], answer: 2 },
-            { question: "Which among the following is false with respect to ownership rules? ", options: ["Owner never goes out of scope", "There can only be one owner at a time.", "When the owner goes out of scope, the value will be dropped.", "Each value in Rust has a variable which is the owner."], answer: 0 },
-            { question: "What does the String data type hold in Rust? ", options: ["a pointer to the memory where String resides and its capacity", "a pointer to the memory where String resides, a length, and a capacity", "a string value and its length", "a string value, a length, and a capacity"], answer: 1 },
-            { question: "What is the proper notation of Rust's range syntax? ", options: ["let slice = &s[0-2];", "let slice = &s[0..2];", "let slice = s[0-2];", "let slice = &s[0:2];"], answer: 1 },
-            { question: "Which among the following is true with respect to Multiple impl blocks?", options: ["Each struct is allowed to have multiple impl blocks", "each method in its own impl block", "first parameter is always self", "All of the above"], answer: 3 },
-            { question: "Rust uses a package manager called:", options: ["NPM", "Pip", "Cargo", "Maven"], answer: 2 },
-            { question: "Which of the following is not a valid Rust variable binding?", options: ["let x = 5;", "let z: i32 = 'hello';", "let mut y = 10;", "let s = String::from('world');"], answer: 1 },
-            { question: "Ownership is primarily managed through:", options: ["Reference counting", "Garbage collection", "memory management", "Ownership transfer"], answer: 3 },
-            { question: "What is the result of this code: let x = Some(5); let y = x.unwrap_or(10);", options: [" x contains Some(5)", "x contains None", "x contains 10", "y contains 5"], answer: 3 },
-            { question: "Which keyword is used to define a new trait?", options: ["interface", "trait", "impl", "self"], answer: 1 },
-            { question: "What does the 'async' keyword indicate in Rust?", options: ["marks a function as a generator", "to implement sync trait", "marks a function as asynchronous", "marks a function as unsafe"], answer: 2 },
-            { question: "What does the 'Drop' trait allow you to do?", options: ["Manually deallocate memory", "Perform cleanup operations before a value goes out of scope", "Prevent other threads from accessing a value", "Convert a value to a different type"], answer: 1 },
-            { question: "What does the 'Copy' trait indicate in Rust?", options: ["It allows mutation of values", "It allows comparison of values", "It allows cloning of values", "It allows serialization of values"], answer: 2 },
-            { question: "Which of the following is not a valid numeric type in Rust?", options: ["u8", "c64", "f32", "i16"], answer: 1 },
-            { question: "Which of the following is not a valid slice in Rust?", options: ["&[1, 2, 3]", "&[1; 3]", "&vec![1, 2, 3]", "&[1..=3]"], answer: 3 },
-            { question: "What does the 'unwrap' method do on an Option type?", options: ["It returns the inner value if it exists, otherwise it returns None", "It returns a reference to the inner value", "It returns the inner value if it exists, otherwise it panics", "It converts the Option type to a Result type"], answer: 2 },
-            { question: "What does the 'self' keyword represent in a method definition?", options: ["The current module", "The current function", "The current struct or enum instance", "The current thread"], answer: 2 },
-            { question: "Which of the following is not a valid Rust comment?", options: ["// This is a comment", "/* This is a comment */", " //! This is a documentation comment", "/// This is a documentation comment"], answer: 3 },
-            { question: "What does the 'mod' keyword do?", options: ["It defines a new module", "It imports a module from another file", "It marks a module as public", "It defines a macro"], answer: 0 },
-            { question: "Which of the following is true about Rust's smart pointer types?", options: ["Rust does not have smart pointer types", "Rust's smart pointer types allow mutable references to data", "Rust's smart pointer types allow shared ownership of data", "Rust's smart pointer types are automatically deallocated when they go out of scope"], answer: 2 },
-            { question: "How do you create a new instance of a string?", options: ["Using the String struct's new method", "Using the String::from function", "Using the str::new method", "Using the str::from function"], answer: 1 },
-            { question: "What does the 'mut' keyword indicate in Rust?", options: ["It marks a function as mutable", "It marks a variable as mutable", "It marks a type as mutable", "It marks a block of code as mutable"], answer: 1 },
-            { question: "Which of the following is true about Rust's string types?", options: ["Rust only supports ASCII strings", "Rust only supports null-terminated strings", "Rust supports only fixed-length strings", " Rust supports both UTF-8 and ASCII strings"], answer: 3 },
-            { question: "Which of the following is true about Rust's reference types?", options: ["References can be null", "References can be mutable or immutable", "References can have a longer lifetime than the data they reference", "References are automatically deallocated when they go out of scope"], answer: 1 },
-            { question: "In Rust, how do you define a new type alias?", options: ["Using the type keyword", "Using the alias keyword", "Using the typedef keyword", "Using the define keyword"], answer: 1 },
-            { question: "Which of the following is the correct way to use a Result type in Rust for error handling?", options: ["Using the `try` keyword", "Using the `check` keyword", "Using the `if` statement", "Using the `match` expression"], answer: 3 },
-            //{ question: "", options: ["", "", "", ""], answer: 0 },
-            //{ question: "", options: ["", "", "", ""], answer: 0 },
-        ];
-        
-        var currentQuestion = 0; var score = 0; var startQuizTimer = false; var elapsedTime = 0;
-        var questionNum = 0; var askedQuestions = []; var totalQuestions = 25;
-        function getRandomArbitrary(min, max) { return Math.random() * (max - min) + min; }
-        var getNextQuestion = function(){ var NextQuestionNum = parseInt(getRandomArbitrary(0, QUESTIONS.length)); if(!askedQuestions.includes(NextQuestionNum)){ currentQuestion = NextQuestionNum; } else{ getNextQuestion(); } }
-        function displayQuestion() { getNextQuestion(); questionNum++; document.getElementById("questionNum").textContent = "( " + questionNum + " / " + totalQuestions + " )" ;
-            document.getElementById("question").textContent = QUESTIONS[currentQuestion].question;
-            var options = QUESTIONS[currentQuestion].options; for (var i = 0; i < options.length; i++) { var optionLabel = document.getElementById("option" + (i + 1) + "-label"); optionLabel.textContent = options[i]; }
-            askedQuestions.push(currentQuestion);
+        // Quiz questions
+const questions = 
+[
+{
+    question: "What is the output of the following code?", 
+    code: 
+`fn main() { 
+    let x = 5; 
+    let y = 0; 
+    let result = x / y; 
+    println!("Result: {}", result); 
+}`
+},
+{ 
+    question: "What does the following code do?", 
+    code: 
+`fn main() { 
+    let mut v = vec![1, 2, 3]; 
+    let element = v[3]; 
+    println!("Element: {}", element); 
+}` 
+},
+{ 
+    question: "What is the issue with this code?", 
+    code: 
+`fn main() { 
+    let s = "hello"; 
+    s.push('!'); 
+    println!("Modified string: {}", s); 
+}` 
+},
+{ 
+    question: "What does the following code do?", 
+    code: 
+`fn main() { 
+    let x: u32 = "abc".parse().unwrap(); 
+    println!("Parsed value: {}", x); 
+}` 
+},
+{ 
+    question: "What is the result of the following code?", 
+    code: 
+`fn main() { 
+    let mut v = vec![1, 2, 3]; 
+    let first_element = v.get(0).unwrap(); 
+    v.clear(); println!("First element: {}", first_element); 
+}` 
+},
+{ 
+    question: "What will be printed by this function?", 
+    code: 
+`fn print_value<T>(value: T) { 
+    println!("Value: {}", value); 
+} 
+
+fn main() { 
+    let text = "Hello, World!"; 
+    print_value(text); 
+}` 
+},
+{ 
+    question: "What is the output of the following code?", 
+    code: 
+`trait Greeting { 
+    fn greet(&self) -> String; 
+} 
+
+struct Person { name: String, } 
+
+impl Greeting for Person { 
+    fn greet(&self) -> String { 
+        format!("Hello, my name is {}.", self.name) 
+    } 
+}
+
+fn main() { 
+    let person = Person { 
+        name: String::from("Alice"), 
+    }; 
+    println!("{}", person.greet()); 
+}` 
+},
+{ 
+    question: "What is the result of this code?", 
+    code: 
+`struct Point<T> { x: T, y: T, } 
+
+fn print_coordinates(point: Point<f64>) { 
+    println!("Coordinates: ({}, {})", point.x, point.y); 
+}
+
+fn main() { 
+    let point = Point { x: 3, y: 5 }; 
+    print_coordinates(point); 
+}` 
+},
+{ 
+    question: "What does this code print?", 
+    code: 
+`struct Person { name: String, age: u32, } 
+
+fn print_person(person: &Person) { 
+    println!("Name: {}, Age: {}", person.name, person.age); 
+}
+
+fn main() { 
+    let name = "John Doe"; 
+    let age = "25"; 
+    let person = Person { name, age }; 
+    print_person(&person); 
+}` 
+},
+{ 
+    question: "What will the following code output?", 
+    code: 
+`struct Pair<T> { x: T, y: T, } 
+
+fn print_sum(pair: Pair<i32>) { 
+    let sum = pair.x + pair.y; 
+    println!("Sum: {}", sum); 
+} 
+fn main() { 
+    let pair = Pair { x: 3, y: 5.0 }; 
+    print_sum(pair); 
+}` 
+},
+{ 
+    question: "What is the purpose of the Printable trait?", 
+    code: 
+`trait Printable { 
+    fn print(&self); 
+}
+struct Rectangle { width: f64, height: f64, } 
+
+impl Printable for Rectangle { 
+    fn print(&self) { 
+        println!("Rectangle: {} x {}", self.width, self.height); 
+    } 
+}
+fn main() { 
+    let rectangle = Rectangle { width: 10.0, height: 5.0 }; 
+    rectangle.print(); 
+}` 
+},
+{ 
+    question: "What will the following code output?", 
+    code: 
+`struct Point<T> { x: T, y: T, } 
+
+fn print_coordinates(point: &Point<T>) { 
+    println!("Coordinates: ({}, {})", point.x, point.y); 
+}
+
+fn main() { 
+    let point = Point { x: 3, y: 5 }; 
+    print_coordinates(&point); 
+}` 
+},
+{ 
+    question: "What is the result of the following code?", 
+    code: 
+`struct Circle<T> { radius: T, } 
+
+fn main() { 
+    let circle = Circle { radius: 3.5 }; 
+    let radius: f64 = circle.radius; 
+    println!("Radius: {}", radius); 
+}` 
+},
+{ 
+    question: "What will this code output?", 
+    code: 
+`fn main() { 
+    let mut count = 0; 
+    while count < 5 { 
+        println!("Count: {}", count); 
+        count += 1; 
+    } 
+    break; 
+    println!(\"Loop ended\");
+}` 
+},
+{ 
+    question: "What will the following code print?", 
+    code: 
+`fn modify_vec(vec: &mut Vec<i32>) { 
+    vec.push(4);
+}
+
+fn main() { 
+    let mut numbers = vec![1, 2, 3]; 
+    modify_vec(&numbers); 
+    println!("Numbers: {:?}", numbers); 
+}` 
+},
+{ 
+    question: "What issue does this code have?", 
+    code: 
+`use std::sync::{Arc, Mutex}; 
+use std::thread;
+
+fn main() { 
+    let resource1 = Arc::new(Mutex::new(1)); 
+    let resource2 = Arc::new(Mutex::new(2)); 
+    let resource1_clone = Arc::clone(&resource1); 
+    let resource2_clone = Arc::clone(&resource2); 
+    let handle1 = thread::spawn(move || { 
+        let _guard1 = resource1.lock().unwrap(); 
+        thread::sleep(std::time::Duration::from_secs(1)); 
+        let _guard2 = resource2_clone.lock().unwrap(); 
+        println!("Thread 1 acquired both resources."); 
+    }); 
+    let handle2 = thread::spawn(move || { 
+        let _guard2 = resource2.lock().unwrap(); 
+        thread::sleep(std::time::Duration::from_secs(1)); 
+        let _guard1 = resource1_clone.lock().unwrap(); 
+        println!("Thread 2 acquired both resources."); 
+    }); 
+    handle1.join().unwrap(); 
+    handle2.join().unwrap(); 
+    println!("Both threads completed."); 
+}` 
+},
+{ 
+    question: "What will be the output of this code?", 
+    code: 
+`use std::thread; 
+fn main() { 
+    let handle = thread::spawn(|| { 
+        println!("Hello from the thread!"); 
+    }); 
+    println!("Main thread exiting"); 
+}` 
+},
+{ 
+    question: "What does this match statement do?", 
+    code: 
+`fn main() { 
+    let number = 42; 
+    match number { 
+        1..=10 => println!("Number is between 1 and 10"), 
+        11..=20 => println!("Number is between 11 and 20"), 
+        21..=30 => println!("Number is between 21 and 30"), 
+        _ => println!("Number is not in the expected range"), 
+        42 => println!("The Answer to the Ultimate Question of Life, the Universe, and Everything"), 
+    }
+}` 
+},
+{ 
+    question: "What is the issue with this code?", 
+    code: 
+`use std::thread; 
+use std::time::Duration; 
+
+async fn fetch_data() -> Result<String, &'static str> { 
+    thread::sleep(Duration::from_secs(2)); 
+    Err(\"Failed to fetch data\") 
+}
+
+fn main() { 
+    let result = tokio::runtime::Runtime::new().unwrap().block_on(fetch_data()); 
+    match result { 
+        Ok(data) => println!("Received data: {}", data), 
+        Err(err) => println!("Error: {}", err), 
+    }
+}` 
+},
+{ 
+    question: "What will this code output?", 
+    code: 
+`async fn do_something_async() { 
+    println!("Doing something asynchronously..."); 
+} 
+
+#[tokio::main] 
+async fn main() { 
+    do_something_async(); 
+    println!("Main thread exiting"); 
+}` 
+}
+];
+
+        // DOM Elements
+        const setupSection = document.getElementById('setup');
+        const quizSection = document.getElementById('quiz');
+        const resultSection = document.getElementById('result');
+        const teamForm = document.getElementById('teamForm');
+        const team1Input = document.getElementById('team1');
+        const team2Input = document.getElementById('team2');
+        const team1NameEl = document.getElementById('team1Name');
+        const team2NameEl = document.getElementById('team2Name');
+        const team1ScoreEl = document.getElementById('team1Score');
+        const team2ScoreEl = document.getElementById('team2Score');
+        const questionCounterEl = document.getElementById('questionCounter');
+        const timerEl = document.getElementById('timer');
+        const timerProgressEl = document.getElementById('timerProgress');
+        const questionTextEl = document.getElementById('questionText');
+        const codeBlockEl = document.getElementById('codeBlock');
+        const nextBtn = document.getElementById('nextBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const winnerEl = document.getElementById('winner');
+        const finalScoresEl = document.getElementById('finalScores');
+        const timerModal = document.getElementById('timerModal');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+        // Quiz state
+        let currentQuestionIndex = 0;
+        let team1Score = 0;
+        let team2Score = 0;
+        let team1Name = '';
+        let team2Name = '';
+        let timerInterval;
+        let timeLeft = 120; // 2 minutes in seconds
+
+        // Start the quiz
+        teamForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            team1Name = team1Input.value.trim();
+            team2Name = team2Input.value.trim();
+            
+            if (!team1Name || !team2Name) {
+                alert('Please enter names for both teams');
+                return;
+            }
+            
+            // Update team names in the UI
+            team1NameEl.textContent = team1Name;
+            team2NameEl.textContent = team2Name;
+            
+            // Hide setup, show quiz
+            setupSection.style.display = 'none';
+            quizSection.style.display = 'block';
+            
+            // Load first question
+            loadQuestion(0);
+            startTimer();
+        });
+
+        // Load a question
+        function loadQuestion(index) {
+            if (index >= questions.length) {
+                endQuiz();
+                return;
+            }
+            
+            const question = questions[index];
+            questionTextEl.textContent = question.question;
+            codeBlockEl.textContent = question.code;
+            
+            // Update syntax highlighting
+            Prism.highlightElement(codeBlockEl);
+            
+            // Update question counter
+            questionCounterEl.textContent = `Question ${index + 1}/${questions.length}`;
+            
+            // Reset timer
+            resetTimer();
         }
-        function nextQuestion() {
-            var selectedOption = document.querySelector('input[name="option"]:checked');
-            if (selectedOption) { 
-                var selectedOptionIndex = parseInt(selectedOption.id.slice(-1)) - 1; if (selectedOptionIndex === QUESTIONS[currentQuestion].answer) { score++; } selectedOption.checked = false; 
-                if (askedQuestions.length < totalQuestions) { displayQuestion(); }  else { displayResult(); }
-            };
+
+        // Timer functions
+        function startTimer() {
+            timeLeft = 120;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                
+                updateTimerDisplay();
+                if (timeLeft > 0){
+                    timeLeft--;
+                };
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    //showTimerModal();
+                }
+            }, 1000);
         }
-        var ShowElapsedTime = function(){
-            elapsedTime++; const timer = new Date(elapsedTime * 1000).toISOString().slice(11, 19);
-            document.getElementById("ElapsedTime").textContent = timer;
-            if(startQuizTimer){ setTimeout(ShowElapsedTime, 1000); };
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            startTimer();
         }
-        function displayResult() {
-            startQuizTimer = false; document.getElementById("QuestionBox").hidden = true; document.getElementById("ResultBox").hidden = false;
-            document.getElementById("result").textContent = "Your score: " + score + " out of " + totalQuestions;
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerEl.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            
+            // Update progress bar
+            const percentage = (timeLeft / 120) * 100;
+            timerProgressEl.style.width = `${percentage}%`;
         }
-        var StartQuiz = function(){
-            startQuizTimer = true; document.getElementById("StartBox").hidden = true; document.getElementById("QuestionBox").hidden = false; document.getElementById("QuizTimer").hidden = false;
-            ShowElapsedTime(); displayQuestion();
+
+        // Show timer modal instead of alert
+        function showTimerModal() {
+            timerModal.style.display = 'flex';
         }
-        document.addEventListener("contextmenu", function (e){ e.preventDefault();}, false);
+
+        // Close timer modal
+        modalCloseBtn.addEventListener('click', () => {
+            timerModal.style.display = 'none';
+        });
+
+        // Next question button
+        nextBtn.addEventListener('click', () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion(currentQuestionIndex);
+            } else {
+                endQuiz();
+            }
+        });
+
+        // Add point buttons
+        document.querySelectorAll('.add-point').forEach(button => {
+            button.addEventListener('click', function() {
+                const team = this.getAttribute('data-team');
+                
+                if (team === '1') {
+                    team1Score++;
+                    team1ScoreEl.textContent = team1Score;
+                } else {
+                    team2Score++;
+                    team2ScoreEl.textContent = team2Score;
+                }
+            });
+        });
+
+        // End quiz and show results
+        function endQuiz() {
+            clearInterval(timerInterval);
+            
+            quizSection.style.display = 'none';
+            resultSection.style.display = 'block';
+            
+            finalScoresEl.textContent = `${team1Name}: ${team1Score} points | ${team2Name}: ${team2Score} points`;
+            
+            if (team1Score > team2Score) {
+                winnerEl.textContent = `${team1Name} wins!`;
+            } else if (team2Score > team1Score) {
+                winnerEl.textContent = `${team2Name} wins!`;
+            } else {
+                winnerEl.textContent = "It's a tie!";
+            }
+        }
+
+        // Restart quiz
+        restartBtn.addEventListener('click', () => {
+            // Reset state
+            currentQuestionIndex = 0;
+            team1Score = 0;
+            team2Score = 0;
+            team1ScoreEl.textContent = '0';
+            team2ScoreEl.textContent = '0';
+            
+            // Show setup screen again
+            resultSection.style.display = 'none';
+            setupSection.style.display = 'block';
+            
+            // Clear inputs
+            team1Input.value = '';
+            team2Input.value = '';
+        });
     </script>
 </body>
 </html>
