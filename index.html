@@ -307,7 +307,9 @@
                 <div class="question-container">
                     <div class="question-header">
                         <div class="question-counter" id="questionCounter">Question 1/10</div>
+                        
                         <div class="timer" id="timer">2:00</div>
+                        <button id="startTimer" onclick="startTimer()">Start Timer</button>
                     </div>
                     <div class="timer-bar">
                         <div class="timer-progress" id="timerProgress"></div>
@@ -702,7 +704,7 @@ async fn main() {
             
             // Load first question
             loadQuestion(0);
-            startTimer();
+            //startTimer();
         });
 
         // Load a question
@@ -728,26 +730,29 @@ async fn main() {
 
         // Timer functions
         function startTimer() {
-            timeLeft = 120;
-            updateTimerDisplay();
+            //timeLeft = 120;
+            //updateTimerDisplay();
             
             timerInterval = setInterval(() => {
                 
-                updateTimerDisplay();
                 if (timeLeft > 0){
                     timeLeft--;
                 };
+
+                updateTimerDisplay();
                 
-                if (timeLeft <= 0) {
+                if (timeLeft < 0) {
                     clearInterval(timerInterval);
-                    //showTimerModal();
+                    showTimerModal();
                 }
             }, 1000);
         }
 
         function resetTimer() {
+            timeLeft = 120;
+            updateTimerDisplay();
             clearInterval(timerInterval);
-            startTimer();
+            //startTimer();
         }
 
         function updateTimerDisplay() {
@@ -774,6 +779,7 @@ async fn main() {
         nextBtn.addEventListener('click', () => {
             currentQuestionIndex++;
             if (currentQuestionIndex < questions.length) {
+                resetTimer();
                 loadQuestion(currentQuestionIndex);
             } else {
                 endQuiz();
